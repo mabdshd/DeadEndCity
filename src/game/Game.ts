@@ -65,6 +65,7 @@ export class Game {
   private lastPromptText = "";
   private bustedTimer = 0;
   private bustGrace = 0;
+  private finaleVisible = false;
   private fireCooldown = 0;
   private muzzleTimer = 0;
   private vehicleCleanupTimer = 0;
@@ -215,7 +216,11 @@ export class Game {
     const mouse = this.input.consumeMouseDelta();
     this.playerCamera.applyMouse(mouse.x, mouse.y);
 
-    if (this.input.consumePressed("Escape") || this.input.consumePressed("KeyP")) {
+    if (
+      (this.input.consumePressed("Escape") || this.input.consumePressed("KeyP")) &&
+      this.state.mode !== "busted" &&
+      !this.finaleVisible
+    ) {
       this.setPaused(!this.paused);
     }
     if (this.paused) {
@@ -327,7 +332,11 @@ export class Game {
     this.state.mode = paused ? "paused" : "playing";
     const overlay = document.getElementById("pause-overlay") as HTMLElement;
     overlay.classList.toggle("hidden", !paused);
-    if (!paused) this.input.requestPointerLock();
+    if (paused) {
+      document.exitPointerLock();
+    } else {
+      this.input.requestPointerLock();
+    }
   }
 
   private updateSafehouseBanking(): void {
@@ -504,12 +513,14 @@ export class Game {
     stats.textContent = `BANKED $${this.state.bankedCash}\nCARRIED $${this.state.carriedCash}\nBEST BANKED $${this.cash.bestBanked}`;
     const overlay = document.getElementById("finale-overlay") as HTMLElement;
     overlay.classList.remove("hidden");
+    this.finaleVisible = true;
     document.exitPointerLock();
   }
 
   private hideFinale(): void {
     const overlay = document.getElementById("finale-overlay") as HTMLElement;
     overlay.classList.add("hidden");
+    this.finaleVisible = false;
     this.input.requestPointerLock();
   }
 

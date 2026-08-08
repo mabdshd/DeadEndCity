@@ -10,32 +10,35 @@ None.
 
 ## Fixes Made
 
-- Set `DEBUG_MODE = false` in `src/game/constants.ts` (production default)
-- Added `this.startPos = MISSION_LOCATIONS.markedCar` to `HotStartMission` constructor so M1 shows start marker after bust instead of auto-activating
-- Mark police vehicle as `stolen = true` when entered to prevent duplicate theft crime on re-entry
+- `Game.setPaused(true)` now exits pointer lock so the RESUME button is actually clickable (previously pointer lock stayed active and routed all clicks to the canvas, making the button unreachable). Resume re-requests pointer lock from the button click gesture.
+- Esc/KeyP pause toggle is now blocked while `state.mode === "busted"` and while the finale overlay is visible. Previously pressing Esc inside the 1.6s busted window flipped `mode` to "paused" then "playing", skipping respawn and leaving the full-screen BUSTED overlay + 0 HP forever; Esc during the finale left the finale overlay stuck over a paused game.
 
 ## QA Watch Items
 
-1. Pointer lock auto-re-lock after bust/keep-playing may fail silently (canvas click fallback works)
-2. Stolen police vehicle lights remain in last state (not controlled by PoliceManager)
-3. HUD elements render over overlay backgrounds (z-index layering, visual only)
-4. Audio one-shot sounds don't explicitly disconnect oscillators (minor leak risk in long sessions)
-5. M2 `robberyStarted` dead code field exists
-6. Police `seesPlayer` allocates new Ray per unit per frame (minor GC pressure)
-7. Abandoned stolen vehicle cleanup depends on distance/time thresholds (verify 15s/60m stolen, 40s/90m civilian)
-8. Pedestrian cap at 14 (config) vs MASTER_PLAN 12-24 target
-9. Mission vehicle never cleaned up if player busts while not in it (protected by category check)
-10. Verify production build loads from static hosting (relative paths, no localhost deps)
+1. Esc/P pressed during the BUSTED overlay is ignored — confirm bust still auto-respawns and recovers to PLAYING.
+2. Auto pointer re-lock after bust/keep-playing may be denied by the browser — canvas click must re-lock; game must stay playable unlocked.
+3. Pause → RESUME works via button and via Esc/P; no residual cursor/input conflict.
+4. KEEP PLAYING free roam: M1/M2/M3 listeners inert, rewards never re-fire, markers gone; traffic/peds/crimes/wanted/police/banking/pistol still work.
+5. Bust during M1/M2/M3: mission restarts with fresh markers/vehicles, no duplicate reward, no reward granted while busted.
+6. Finale fires only on m3 completion — cannot trigger from bust/3-star.
+7. Siren stops after wanted clear and after bust respawn; engine stops on exit/bust; no oscillator growth over repeated bust + enter/exit.
+8. Long session: traffic ~10, peds ~14, police 0–3, abandoned stolen cars despawn; no entity/event/marker accumulation.
+9. Combat: fire-rate cap holds under click spam; assault_police caps at 3 stars; peds flee on gunfire; shooting inert during pause/busted/finale.
+10. Banking: wanted>0 blocks, carried→0 after bank, banked survives bust, $0 bank harmless, malformed localStorage cannot crash.
 
 ## Deployment Watch Items
 
-1. `DEBUG_MODE` must remain `false` in production
-2. Asset paths in `dist/index.html` use hashed filenames (Vite handles)
-3. `localStorage` usage wrapped in try/catch (no crash on private browsing)
-4. No backend, no absolute paths, no dev-only APIs
-5. Single `AudioContext` created on user gesture (title screen click)
-6. Build output `dist/` is self-contained for static hosting
+1. `base: "./"` → dist uses relative asset paths; verify on a static host (including a sub-path).
+2. `localStorage` wrapped in try/catch — no crash under blocked/private storage.
+3. Single AudioContext, initialized on title-button gesture.
+4. `DEBUG_MODE = false` — debug panel hidden, debug keys inert in production.
+5. No backend/network dependency; `dist/` is self-contained.
+6. Fresh/incognito load: title → start, clean console, no focus trap.
 
 ## Build
 
 PASS
+
+## Created
+
+FINAL_PRE_QA_REVIEW.md
