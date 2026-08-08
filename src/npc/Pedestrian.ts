@@ -59,6 +59,7 @@ export class Pedestrian {
 
     for (const m of [body, head, legL, legR]) {
       m.metadata = { ped: this };
+      m.isPickable = true;
     }
 
     this.timer = PEDESTRIAN_CONFIG.idleMin + Math.random() * (PEDESTRIAN_CONFIG.idleMax - PEDESTRIAN_CONFIG.idleMin);

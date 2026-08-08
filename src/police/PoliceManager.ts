@@ -48,7 +48,7 @@ export class PoliceManager {
     events.on("vehicle:entered", ({ vehicleId }) => {
       for (let i = this.units.length - 1; i >= 0; i--) {
         if (this.units[i].vehicle.id === vehicleId) {
-          this.despawn(i);
+          this.units.splice(i, 1);
           return;
         }
       }
