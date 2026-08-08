@@ -6,6 +6,25 @@ export const PLAYER_CONFIG = {
   accel: 60,
   height: 1.8,
   radius: 0.35,
+  maxHealth: 100,
+};
+
+export const BUST_CONFIG = {
+  overlayMs: 1600,
+  policeProxRange: 7,
+  policeProxGrace: 0.6,
+  policeProxDrainFoot: 26,
+  policeProxDrainVehicle: 13,
+  crashDamageThreshold: 9,
+  crashDamageScale: 1.0,
+};
+
+export const COMBAT_CONFIG = {
+  enabled: true,
+  range: 65,
+  fireRate: 0.22,
+  damage: 34,
+  muzzleMs: 45,
 };
 
 export const FOOT_CAMERA = {

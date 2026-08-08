@@ -67,4 +67,8 @@ export class HeatlineMission extends Mission {
     this.setObjective("DISTRICT CLEARED");
     this.complete();
   }
+
+  protected onReset(): void {
+    this.pickedUp = false;
+  }
 }

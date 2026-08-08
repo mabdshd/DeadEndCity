@@ -43,6 +43,10 @@ export class TrafficSystem {
     return this.units.length;
   }
 
+  hasVehicle(id: string): boolean {
+    return this.units.some((u) => u.vehicle.id === id);
+  }
+
   private onVehicleEntered(vehicleId: string): void {
     for (let i = this.units.length - 1; i >= 0; i--) {
       if (this.units[i].vehicle.id === vehicleId) {
@@ -55,6 +59,7 @@ export class TrafficSystem {
   update(dt: number): void {
     this.spawnCooldown -= dt;
     const player = this.getPlayerPos();
+    const traffic = this.trafficVehicles();
 
     for (let i = this.units.length - 1; i >= 0; i--) {
       const unit = this.units[i];
@@ -63,7 +68,7 @@ export class TrafficSystem {
         this.units.splice(i, 1);
         continue;
       }
-      this.updateUnit(unit, dt, player);
+      this.updateUnit(unit, dt, player, traffic);
     }
 
     if (this.units.length < TRAFFIC_CONFIG.cap && this.spawnCooldown <= 0) {
@@ -93,7 +98,7 @@ export class TrafficSystem {
     return out;
   }
 
-  private updateUnit(unit: TrafficUnit, dt: number, player: Vector3): void {
+  private updateUnit(unit: TrafficUnit, dt: number, player: Vector3, traffic: Vehicle[]): void {
     const v = unit.vehicle;
     const node = this.network.getNode(unit.route[unit.nextIndex]);
     const target = this.laneTarget(node, v.position.x, v.position.z, this.tmp);
@@ -105,7 +110,7 @@ export class TrafficSystem {
       unit.nextIndex = (unit.nextIndex + 1) % unit.route.length;
     }
 
-    const obstacle = obstacleAhead(v, this.trafficVehicles(), this.getPlayerDriving() ? player : null, TRAFFIC_CONFIG.obstacleDist);
+    const obstacle = obstacleAhead(v, traffic, this.getPlayerDriving() ? player : null, TRAFFIC_CONFIG.obstacleDist);
 
     const targetSpeed = v.def.topSpeed * TRAFFIC_CONFIG.speedMul;
     let throttle = 1;

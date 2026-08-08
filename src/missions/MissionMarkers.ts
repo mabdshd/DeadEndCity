@@ -35,6 +35,18 @@ export class MissionMarkers {
     beacon.position = new Vector3(pos.x, ground ? 4.2 : 2.2, pos.z);
     beacon.isPickable = false;
     this.meshes.push(beacon);
+
+    if (ground) {
+      const pillar = MeshBuilder.CreateCylinder(`missionMarker_pillar_${this.meshes.length}`, {
+        height: 3.2,
+        diameterTop: 0.06,
+        diameterBottom: 0.06,
+      }, this.scene);
+      pillar.material = mat;
+      pillar.position = new Vector3(pos.x, 3.1, pos.z);
+      pillar.isPickable = false;
+      this.meshes.push(pillar);
+    }
   }
 
   update(time: number): void {

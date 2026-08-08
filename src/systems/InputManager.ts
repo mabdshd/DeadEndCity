@@ -1,6 +1,8 @@
 export class InputManager {
   private keys = new Set<string>();
   private pressed = new Set<string>();
+  private buttons = new Set<number>();
+  private buttonsPressed = new Set<number>();
   private mouseDX = 0;
   private mouseDY = 0;
   private locked = false;
@@ -13,6 +15,9 @@ export class InputManager {
     document.addEventListener("mousemove", this.onMouseMove);
     document.addEventListener("pointerlockchange", this.onLockChange);
     canvas.addEventListener("mousedown", this.onCanvasClick);
+    canvas.addEventListener("mousedown", this.onMouseDown);
+    window.addEventListener("mouseup", this.onMouseUp);
+    window.addEventListener("blur", this.onBlur);
   }
 
   private onKeyDown = (e: KeyboardEvent): void => {
@@ -34,6 +39,20 @@ export class InputManager {
 
   private onCanvasClick = (): void => {
     this.requestPointerLock();
+  };
+
+  private onMouseDown = (e: MouseEvent): void => {
+    this.buttons.add(e.button);
+    this.buttonsPressed.add(e.button);
+  };
+
+  private onMouseUp = (e: MouseEvent): void => {
+    this.buttons.delete(e.button);
+  };
+
+  private onBlur = (): void => {
+    this.buttons.clear();
+    this.keys.clear();
   };
 
   private onLockChange = (): void => {
@@ -70,8 +89,17 @@ export class InputManager {
     return this.pressed.delete(code);
   }
 
+  isMouseDown(button: number): boolean {
+    return this.buttons.has(button);
+  }
+
+  consumePressedButton(button: number): boolean {
+    return this.buttonsPressed.delete(button);
+  }
+
   endFrame(): void {
     this.pressed.clear();
+    this.buttonsPressed.clear();
   }
 
   dispose(): void {
@@ -80,5 +108,8 @@ export class InputManager {
     document.removeEventListener("mousemove", this.onMouseMove);
     document.removeEventListener("pointerlockchange", this.onLockChange);
     this.canvas.removeEventListener("mousedown", this.onCanvasClick);
+    this.canvas.removeEventListener("mousedown", this.onMouseDown);
+    window.removeEventListener("mouseup", this.onMouseUp);
+    window.removeEventListener("blur", this.onBlur);
   }
 }

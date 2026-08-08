@@ -18,6 +18,7 @@ export interface MissionContext {
   scene: import("@babylonjs/core").Scene;
   landmarks: Landmarks;
   flash(text: string, ms?: number): void;
+  alarm(): void;
   playerPos(): Vector3;
   isInVehicle(): boolean;
   currentVehicleId(): string | null;
@@ -73,6 +74,8 @@ export abstract class Mission {
 
   protected onUpdate(dt: number, time: number): void {}
 
+  protected onReset(): void {}
+
   activate(): void {
     this.state = "active";
     this.onActivate();
@@ -121,11 +124,26 @@ export abstract class Mission {
     this.ctx.events.emit("mission:completed", { missionId: this.id });
   }
 
-  protected fail(): void {
+  fail(): void {
     if (this.state === "completed" || this.state === "failed") return;
     this.state = "failed";
     this.cleanup();
     this.ctx.events.emit("mission:failed", { missionId: this.id });
+  }
+
+  get hasStartMarker(): boolean {
+    return this.startPos !== null;
+  }
+
+  restart(): void {
+    if (this.state !== "failed") return;
+    this.cleanup();
+    this.currentStage = 0;
+    this.rewardGranted = false;
+    this.objective = "";
+    this.objectivePos = null;
+    this.onReset();
+    this.state = "available";
   }
 
   dispose(): void {

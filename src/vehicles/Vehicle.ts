@@ -17,6 +17,8 @@ export class Vehicle {
   speed = 0;
   category: VehicleCategory = "civilian";
   stolen = false;
+  lastImpactSpeed = 0;
+  lastUsedAt = 0;
 
   private yawVal = 0;
   private throttle = 0;
@@ -24,6 +26,8 @@ export class Vehicle {
   private handbrake = false;
   private startPos: Vector3;
   private startYaw = 0;
+  private readonly deltaTmp = new Vector3();
+  private readonly beforeTmp = new Vector3();
 
   constructor(body: Mesh, def: VehicleDef, spawn: Vector3, spawnYaw: number, wheels: Mesh[] = []) {
     this.body = body;
@@ -82,12 +86,17 @@ export class Vehicle {
     const turnRate = (this.handbrake ? d.handbrakeTurn : d.maxTurn) * speedFactor;
     this.yawVal += this.steer * turnRate * dt * Math.sign(this.speed);
 
-    const delta = this.heading.scale(this.speed * dt);
-    const before = this.body.position.clone();
-    this.body.moveWithCollisions(delta);
-    const moved = before.subtract(this.body.position).length();
-    if (moved < delta.length() - 0.02) {
+    const hx = Math.sin(this.yawVal);
+    const hz = -Math.cos(this.yawVal);
+    this.deltaTmp.set(hx * this.speed * dt, 0, hz * this.speed * dt);
+    this.beforeTmp.copyFrom(this.body.position);
+    this.body.moveWithCollisions(this.deltaTmp);
+    const moved = this.beforeTmp.subtract(this.body.position).length();
+    if (moved < this.deltaTmp.length() - 0.02) {
+      this.lastImpactSpeed = Math.abs(this.speed);
       this.speed *= 0.4;
+    } else {
+      this.lastImpactSpeed = 0;
     }
 
     this.body.rotation.set(0, this.yawVal, 0);

@@ -10,6 +10,7 @@ startButton.addEventListener("click", () => {
   if (game) return;
   game = new Game(canvas);
   game.audio.init();
+  game.audio.playClick();
   overlay.classList.add("hidden");
   game.start();
 });

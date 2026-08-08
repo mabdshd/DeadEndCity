@@ -18,6 +18,9 @@ export class PlayerCamera {
   private lookOffsetYaw = 0;
   pitch = 0.28;
   private vehicleTargetYaw = 0;
+  private shake = 0;
+  private baseFov = FOOT_CAMERA.fov;
+  private speedBoost = 0;
 
   constructor(scene: Scene) {
     this.camera = new TargetCamera("playerCam", new Vector3(0, 2.2, 6), scene);
@@ -28,6 +31,7 @@ export class PlayerCamera {
   switchToFoot(): void {
     this.mode = "foot";
     this.lookOffsetYaw = 0;
+    this.baseFov = FOOT_CAMERA.fov;
     this.camera.fov = FOOT_CAMERA.fov;
   }
 
@@ -36,7 +40,16 @@ export class PlayerCamera {
     this.vehicleYaw = yaw;
     this.vehicleTargetYaw = yaw;
     this.lookOffsetYaw = 0;
+    this.baseFov = VEHICLE_CAMERA.fov;
     this.camera.fov = VEHICLE_CAMERA.fov;
+  }
+
+  addShake(amount: number): void {
+    this.shake = Math.min(0.5, this.shake + amount);
+  }
+
+  setSpeedBoost(factor: number): void {
+    this.speedBoost = Math.max(0, Math.min(1, factor));
   }
 
   applyMouse(dx: number, dy: number): void {
@@ -71,7 +84,14 @@ export class PlayerCamera {
 
     const desired = targetPos.add(off);
     const k = 1 - Math.pow(0.001, dt * cfg.followLerp);
-    this.camera.position = Vector3.Lerp(this.camera.position, desired, k);
+    let pos = Vector3.Lerp(this.camera.position, desired, k);
+    if (this.shake > 0.001) {
+      const s = this.shake;
+      pos = pos.add(new Vector3((Math.random() * 2 - 1) * s, (Math.random() * 2 - 1) * s, 0));
+      this.shake = Math.max(0, this.shake - dt * 3);
+    }
+    this.camera.position = pos;
+    this.camera.fov += (this.baseFov + this.speedBoost * 0.14 - this.camera.fov) * Math.min(1, dt * 5);
     this.camera.setTarget(targetPos.add(new Vector3(0, 1.3, 0)));
   }
 

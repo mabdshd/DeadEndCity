@@ -20,6 +20,8 @@ export type EventMap = {
   "mission:objectiveChanged": { missionId: string; text: string; pos: { x: number; z: number } | null };
   "mission:completed": { missionId: string };
   "mission:failed": { missionId: string };
+  "player:damaged": { health: number };
+  "player:busted": Record<string, never>;
 };
 
 type Handler<K extends keyof EventMap> = (payload: EventMap[K]) => void;

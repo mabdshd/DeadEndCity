@@ -47,6 +47,16 @@ export class HotStartMission extends Mission {
     this.setObjective("DELIVER THE CAR TO THE CHOP SHOP", this.ctx.landmarks.chopShopPos);
   }
 
+  protected onReset(): void {
+    if (this.missionVehicleId) {
+      const v = this.ctx.getVehicle(this.missionVehicleId);
+      if (v && this.ctx.currentVehicleId() !== this.missionVehicleId) {
+        this.ctx.vehicleManager.remove(v);
+      }
+      this.missionVehicleId = null;
+    }
+  }
+
   protected onUpdate(): void {
     if (this.currentStage !== 2) return;
     if (!this.missionVehicleId || this.ctx.currentVehicleId() !== this.missionVehicleId) return;

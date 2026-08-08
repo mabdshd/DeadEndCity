@@ -59,7 +59,17 @@ export class MissionManager {
     if (m && m.state === "locked") m.state = "available";
   }
 
+  failActive(): void {
+    if (this.active && this.active.state === "active") {
+      this.active.fail();
+    }
+  }
+
   private onFailed(id: string): void {
     if (this.active?.id === id) this.active = null;
+    const m = this.missions.find((x) => x.id === id);
+    if (!m) return;
+    m.restart();
+    if (!m.hasStartMarker && m.state === "available") m.activate();
   }
 }

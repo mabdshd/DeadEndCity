@@ -5,7 +5,6 @@ import { Mission } from "./Mission";
 export class QuickCashMission extends Mission {
   private robTimer = 0;
   private robbing = false;
-  private robberyStarted = false;
 
   constructor(ctx: MissionContext) {
     super(ctx, "m2", "QUICK CASH");
@@ -53,6 +52,7 @@ export class QuickCashMission extends Mission {
       z: p.z,
       minWanted: 2,
     });
+    this.ctx.alarm();
     this.ctx.flash("ALARM! $1000 CARRIED AT STAKE — ESCAPE!");
     this.setObjective("ESCAPE THE POLICE");
   }
@@ -63,5 +63,10 @@ export class QuickCashMission extends Mission {
     this.grantReward(MISSION_CONFIG.rewards.m2);
     this.setObjective("BANK THE CASH OR KEEP THE HEAT GOING");
     this.complete();
+  }
+
+  protected onReset(): void {
+    this.robbing = false;
+    this.robTimer = 0;
   }
 }

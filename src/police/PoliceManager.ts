@@ -29,6 +29,8 @@ export class PoliceManager {
   private flash = 0;
   private sirenOn = false;
   private readonly rayFrom = new Vector3();
+  private readonly rayDir = new Vector3();
+  private readonly sharedRay = new Ray(Vector3.Zero(), Vector3.Forward(), 1);
 
   constructor(
     private scene: Scene,
@@ -55,6 +57,28 @@ export class PoliceManager {
 
   get activeCount(): number {
     return this.units.length;
+  }
+
+  hasVehicle(id: string): boolean {
+    return this.units.some((u) => u.vehicle.id === id);
+  }
+
+  nearestDistanceTo(x: number, z: number): number {
+    let best = Infinity;
+    for (const u of this.units) {
+      if (u.state === "DISENGAGE") continue;
+      const dx = u.vehicle.position.x - x;
+      const dz = u.vehicle.position.z - z;
+      const d2 = dx * dx + dz * dz;
+      if (d2 < best) best = d2;
+    }
+    return Math.sqrt(best);
+  }
+
+  clearAll(): void {
+    for (let i = this.units.length - 1; i >= 0; i--) {
+      this.despawn(i);
+    }
   }
 
   get hasContact(): boolean {
@@ -97,13 +121,14 @@ export class PoliceManager {
     const range = POLICE_CONFIG.contactRange;
     if (d2 > range * range) return false;
 
-    const from = this.rayFrom.set(unit.vehicle.position.x, 1.2, unit.vehicle.position.z);
-    const dir = player.subtract(from);
-    const len = dir.length();
+    const len = Math.sqrt(d2);
     if (len < 0.5) return true;
-    dir.normalize();
-    const ray = new Ray(from, dir, len);
-    const hit = this.scene.pickWithRay(ray, (m) => m.checkCollisions && !(m.metadata && m.metadata.isVehicle));
+    const from = this.rayFrom.set(unit.vehicle.position.x, 1.2, unit.vehicle.position.z);
+    this.rayDir.set(dx / len, (player.y - from.y) / len, dz / len);
+    this.sharedRay.origin.copyFrom(from);
+    this.sharedRay.direction.copyFrom(this.rayDir);
+    this.sharedRay.length = len;
+    const hit = this.scene.pickWithRay(this.sharedRay, (m) => m.checkCollisions && !(m.metadata && m.metadata.isVehicle));
     return !(hit && hit.hit && hit.distance < len - 1);
   }
 
