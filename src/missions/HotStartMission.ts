@@ -8,6 +8,7 @@ export class HotStartMission extends Mission {
 
   constructor(ctx: MissionContext) {
     super(ctx, "m1", "HOT START");
+    this.startPos = MISSION_LOCATIONS.markedCar;
   }
 
   protected get markerColor(): string {

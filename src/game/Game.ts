@@ -545,12 +545,15 @@ export class Game {
         minWanted: 1,
       });
     } else if (v.category === "police") {
-      this.events.emit("crime:committed", {
-        type: "vehicle_theft",
-        x: v.position.x,
-        z: v.position.z,
-        minWanted: 2,
-      });
+      if (!v.stolen) {
+        v.stolen = true;
+        this.events.emit("crime:committed", {
+          type: "vehicle_theft",
+          x: v.position.x,
+          z: v.position.z,
+          minWanted: 2,
+        });
+      }
     }
   }
 
