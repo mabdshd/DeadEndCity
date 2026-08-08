@@ -26,7 +26,6 @@ import { HeatlineMission } from "../missions/HeatlineMission";
 import type { MissionContext } from "../missions/Mission";
 import { INTERACTION_RANGE, SAFEHOUSE_CONFIG, VEHICLE_EXIT_OFFSET } from "../config/gameplay";
 import type { Vehicle } from "../vehicles/Vehicle";
-import type { VehicleCategory } from "../vehicles/Vehicle";
 
 type ControlMode = "on_foot" | "in_vehicle";
 
@@ -411,10 +410,13 @@ export class Game {
     const v = this.vehicleController.getVehicle();
     const speed = v ? `${v.speedKmh} km/h` : "-";
     const p = this.player.position;
+    const active = this.missionManager.activeMission;
     this.debugPanel.textContent = [
       `FPS ${Math.round(this.engine.getFps())}`,
       `MODE ${this.controlMode}`,
       `POS ${p.x.toFixed(0)}, ${p.z.toFixed(0)}`,
+      `CASH BANKED ${this.state.bankedCash} CARRIED ${this.state.carriedCash}`,
+      `MISSION ${active ? `${active.id} stage ${active.currentStage}` : "none"}`,
       `VEHICLES ${this.vehicleManager.vehicles.length}`,
       `TRAFFIC ${this.trafficSystem.activeCount}`,
       `PEDS ${this.pedestrianManager.activeCount}`,
