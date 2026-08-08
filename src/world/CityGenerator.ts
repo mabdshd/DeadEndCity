@@ -76,7 +76,7 @@ export function generateCity(scene: Scene): CityResult {
   createLamps(scene);
   createIntersectionProps(scene, rng, props);
 
-  const safehousePos = cellCenter(1, 3);
+  const safehousePos = new Vector3(-20, 0, 100);
   const chopShopPos = cellCenter(2, 0);
   const storePos = cellCenter(3, 0);
   const policeStationPos = cellCenter(0, 3);

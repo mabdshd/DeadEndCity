@@ -33,6 +33,18 @@ export const VEHICLE_CAMERA = {
 export const INTERACTION_RANGE = 3.4;
 export const VEHICLE_EXIT_OFFSET = 2.6;
 
+export const SAFEHOUSE_CONFIG = {
+  bankRadius: 7,
+};
+
+export const MISSION_CONFIG = {
+  rewards: { m1: 500, m2: 1000, m3: 2000 },
+  robDuration: 2.5,
+  triggerRadius: 6,
+  dropOffRadius: 7,
+  startRadius: 9,
+};
+
 export const TRAFFIC_CONFIG = {
   cap: 10,
   despawnDist: 130,

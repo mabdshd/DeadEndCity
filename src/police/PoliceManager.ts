@@ -141,7 +141,7 @@ export class PoliceManager {
       if (d2 < minD2 || d2 > maxD2) continue;
       if (this.vehicleBlocked(node.x, node.z)) continue;
       const yaw = yawTo(player.x, player.z, node.x, node.z);
-      const vehicle = this.vehicleManager.spawn("police", new Vector3(node.x, 0, node.z), yaw);
+      const vehicle = this.vehicleManager.spawn("police", new Vector3(node.x, 0, node.z), yaw, "police");
       const targetNode = this.network.getClosestNode(player.x, player.z);
       this.units.push({
         vehicle,

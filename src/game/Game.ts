@@ -1,6 +1,7 @@
 import { Engine, Ray, Scene, Vector3 } from "@babylonjs/core";
 import { createInitialState, type GameState } from "./GameState";
 import { EventBus } from "./EventBus";
+import { CashSystem } from "./CashSystem";
 import { DEBUG_MODE } from "./constants";
 import { AudioManager } from "../systems/AudioManager";
 import { InputManager } from "../systems/InputManager";
@@ -16,8 +17,16 @@ import { PedestrianManager } from "../npc/PedestrianManager";
 import { WantedSystem } from "../police/WantedSystem";
 import { PoliceManager } from "../police/PoliceManager";
 import { WantedHUD } from "../ui/WantedHUD";
-import { INTERACTION_RANGE, VEHICLE_EXIT_OFFSET } from "../config/gameplay";
+import { CashHUD } from "../ui/CashHUD";
+import { MissionHUD } from "../ui/MissionHUD";
+import { MissionManager } from "../missions/MissionManager";
+import { HotStartMission } from "../missions/HotStartMission";
+import { QuickCashMission } from "../missions/QuickCashMission";
+import { HeatlineMission } from "../missions/HeatlineMission";
+import type { MissionContext } from "../missions/Mission";
+import { INTERACTION_RANGE, SAFEHOUSE_CONFIG, VEHICLE_EXIT_OFFSET } from "../config/gameplay";
 import type { Vehicle } from "../vehicles/Vehicle";
+import type { VehicleCategory } from "../vehicles/Vehicle";
 
 type ControlMode = "on_foot" | "in_vehicle";
 
@@ -38,7 +47,11 @@ export class Game {
   readonly pedestrianManager: PedestrianManager;
   readonly wantedSystem: WantedSystem;
   readonly policeManager: PoliceManager;
+  readonly cash: CashSystem;
+  readonly missionManager: MissionManager;
   private readonly wantedHUD: WantedHUD;
+  private readonly cashHUD: CashHUD;
+  private readonly missionHUD: MissionHUD;
   private pedFleeTimer = 0;
 
   private controlMode: ControlMode = "on_foot";
@@ -69,8 +82,8 @@ export class Game {
     this.playerCamera.switchToFoot();
     this.playerCamera.camera.position = this.player.position.add(new Vector3(0, 2.4, 6));
 
-    this.vehicleManager.spawn("sport", new Vector3(42, 0, 0), Math.PI);
-    this.vehicleManager.spawn("sedan", new Vector3(-70, 0, 45), 0);
+    this.vehicleManager.spawn("sport", new Vector3(42, 0, 0), Math.PI, "civilian");
+    this.vehicleManager.spawn("sedan", new Vector3(-70, 0, 45), 0, "civilian");
 
     this.trafficSystem = new TrafficSystem(
       this.scene,
@@ -105,6 +118,32 @@ export class Game {
     );
 
     this.wantedHUD = new WantedHUD();
+    this.cash = new CashSystem(this.events, this.state);
+    this.cashHUD = new CashHUD(this.events, this.state);
+    this.missionHUD = new MissionHUD();
+
+    const missionCtx: MissionContext = {
+      events: this.events,
+      cash: this.cash,
+      vehicleManager: this.vehicleManager,
+      scene: this.scene,
+      landmarks: this.world.landmarks,
+      flash: (text, ms) => this.missionHUD.flash(text, ms),
+      playerPos: () => this.player.position,
+      isInVehicle: () => this.controlMode === "in_vehicle",
+      currentVehicleId: () =>
+        this.controlMode === "in_vehicle" ? (this.vehicleController.getVehicle()?.id ?? null) : null,
+      getVehicle: (id) => this.vehicleManager.vehicles.find((v) => v.id === id) ?? null,
+      getWantedLevel: () => this.wantedSystem.level,
+    };
+
+    this.missionManager = new MissionManager(
+      missionCtx,
+      [new HotStartMission(missionCtx), new QuickCashMission(missionCtx), new HeatlineMission(missionCtx)],
+      ["m1", "m2", "m3"],
+    );
+    this.missionManager.start();
+    this.events.on("mission:completed", (e) => this.onMissionCompleted(e.missionId));
 
     this.interactPrompt = document.getElementById("interact-prompt") as HTMLElement;
     this.debugPanel = document.getElementById("debug-panel") as HTMLElement;
@@ -112,6 +151,8 @@ export class Game {
 
     const resumeBtn = document.getElementById("resume-button");
     resumeBtn?.addEventListener("click", () => this.setPaused(false));
+    const keepPlayingBtn = document.getElementById("keep-playing-button");
+    keepPlayingBtn?.addEventListener("click", () => this.hideFinale());
 
     window.addEventListener("resize", this.onResize);
     this.engine.runRenderLoop(this.render);
@@ -165,6 +206,8 @@ export class Game {
     this.pedestrianManager.update(dt);
     this.wantedSystem.update(dt);
     this.policeManager.update(dt);
+    this.missionManager.update(dt, this.time);
+    this.updateSafehouseBanking();
 
     this.pedFleeTimer -= dt;
     if (this.wantedSystem.level > 0 && this.policeManager.hasContact && this.pedFleeTimer <= 0) {
@@ -173,6 +216,7 @@ export class Game {
     }
 
     this.wantedHUD.update(this.wantedSystem.level, this.wantedSystem.escapeActive);
+    this.missionHUD.update(this.missionManager.activeMission, this.player.position);
     this.world.update(this.time);
 
     if (DEBUG_MODE) {
@@ -232,6 +276,41 @@ export class Game {
     if (!paused) this.input.requestPointerLock();
   }
 
+  private updateSafehouseBanking(): void {
+    if (this.state.carriedCash <= 0) return;
+    const s = this.world.landmarks.safehousePos;
+    const dx = this.player.position.x - s.x;
+    const dz = this.player.position.z - s.z;
+    if (dx * dx + dz * dz <= SAFEHOUSE_CONFIG.bankRadius * SAFEHOUSE_CONFIG.bankRadius) {
+      this.cash.bankCarriedCash();
+      this.missionHUD.flash("CASH BANKED +$" + this.cash.bankedCash);
+    }
+  }
+
+  private onMissionCompleted(missionId: string): void {
+    if (missionId === "m1") {
+      this.missionHUD.flash("MISSION COMPLETE — +$500 CARRIED. BANK IT OR KEEP THE HEAT GOING.");
+    } else if (missionId === "m2") {
+      this.missionHUD.flash("MISSION COMPLETE — +$1000 CARRIED. BANK THE CASH OR KEEP THE HEAT GOING.");
+    } else if (missionId === "m3") {
+      this.showFinale();
+    }
+  }
+
+  private showFinale(): void {
+    const stats = document.getElementById("finale-stats") as HTMLElement;
+    stats.textContent = `BANKED $${this.state.bankedCash}\nCARRIED $${this.state.carriedCash}\nBEST BANKED $${this.cash.bestBanked}`;
+    const overlay = document.getElementById("finale-overlay") as HTMLElement;
+    overlay.classList.remove("hidden");
+    document.exitPointerLock();
+  }
+
+  private hideFinale(): void {
+    const overlay = document.getElementById("finale-overlay") as HTMLElement;
+    overlay.classList.add("hidden");
+    this.input.requestPointerLock();
+  }
+
   private handleInteraction(): void {
     if (this.controlMode === "on_foot") {
       const v = this.vehicleManager.getNearest(this.player.position.x, this.player.position.z, INTERACTION_RANGE);
@@ -252,12 +331,22 @@ export class Game {
     this.state.playerVehicleId = v.id;
     this.events.emit("vehicle:entered", { vehicleId: v.id });
     this.events.emit("mode:changed", { mode: "in_vehicle" });
-    this.events.emit("crime:committed", {
-      type: "vehicle_theft",
-      x: v.position.x,
-      z: v.position.z,
-      minWanted: 1,
-    });
+    if (v.category === "civilian" && !v.stolen) {
+      v.stolen = true;
+      this.events.emit("crime:committed", {
+        type: "vehicle_theft",
+        x: v.position.x,
+        z: v.position.z,
+        minWanted: 1,
+      });
+    } else if (v.category === "police") {
+      this.events.emit("crime:committed", {
+        type: "vehicle_theft",
+        x: v.position.x,
+        z: v.position.z,
+        minWanted: 2,
+      });
+    }
   }
 
   private exitVehicle(): void {

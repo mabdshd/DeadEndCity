@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HEATLINE: DISTRICT 24</title>
-    <script type="module" crossorigin src="./assets/index-CcMy6uOd.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BNusbDDP.css">
+    <script type="module" crossorigin src="./assets/index-BccCbWn3.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-B59MIgFk.css">
   </head>
   <body>
     <canvas id="game-canvas"></canvas>
@@ -19,11 +19,27 @@
     </div>
     <div id="debug-panel" class="hidden"></div>
     <div id="interact-prompt" class="hidden"></div>
+    <div id="cash-display">
+      <span id="cash-banked">BANKED $0</span>
+      <span id="cash-carried">CARRIED $0</span>
+    </div>
+    <div id="objective-display" class="hidden">
+      <div id="objective-text">STEAL THE MARKED CAR</div>
+      <div id="objective-distance" class="hidden"></div>
+    </div>
+    <div id="feedback-flash" class="hidden"></div>
     <div id="wanted-display" class="hidden"></div>
     <div id="pause-overlay" class="overlay hidden">
       <div class="title-card">
         <h2>PAUSED</h2>
         <button id="resume-button" class="start-button">RESUME</button>
+      </div>
+    </div>
+    <div id="finale-overlay" class="overlay hidden">
+      <div class="title-card">
+        <h2 class="finale-main">DISTRICT CLEARED</h2>
+        <p id="finale-stats" class="finale-stats"></p>
+        <button id="keep-playing-button" class="start-button">KEEP PLAYING</button>
       </div>
     </div>
   </body>

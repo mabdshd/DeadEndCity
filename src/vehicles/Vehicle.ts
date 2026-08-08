@@ -6,6 +6,8 @@ export interface PoliceLights {
   blue: Mesh;
 }
 
+export type VehicleCategory = "civilian" | "police" | "mission";
+
 export class Vehicle {
   readonly id: string;
   readonly body: Mesh;
@@ -13,6 +15,8 @@ export class Vehicle {
   readonly wheels: Mesh[] = [];
   policeLights: PoliceLights | null = null;
   speed = 0;
+  category: VehicleCategory = "civilian";
+  stolen = false;
 
   private yawVal = 0;
   private throttle = 0;

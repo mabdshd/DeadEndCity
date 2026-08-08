@@ -1,6 +1,6 @@
 import { Color3, Mesh, MeshBuilder, Scene, StandardMaterial, Vector3 } from "@babylonjs/core";
 import type { VehicleDef } from "../config/vehicles";
-import { Vehicle } from "./Vehicle";
+import { Vehicle, type VehicleCategory } from "./Vehicle";
 
 interface BuiltMesh {
   body: Mesh;
@@ -113,9 +113,11 @@ export function createVehicle(
   def: VehicleDef,
   spawn: Vector3,
   spawnYaw: number,
+  category: VehicleCategory = "civilian",
 ): Vehicle {
   const built = createCarMesh(scene, def);
   const vehicle = new Vehicle(built.body, def, spawn, spawnYaw, built.wheels);
   vehicle.policeLights = built.policeLights;
+  vehicle.category = category;
   return vehicle;
 }

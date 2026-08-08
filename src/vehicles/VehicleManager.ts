@@ -2,15 +2,16 @@ import { Scene, Vector3 } from "@babylonjs/core";
 import { VEHICLE_DEFS } from "../config/vehicles";
 import { createVehicle } from "./VehicleFactory";
 import type { Vehicle } from "./Vehicle";
+import type { VehicleCategory } from "./Vehicle";
 
 export class VehicleManager {
   readonly vehicles: Vehicle[] = [];
 
   constructor(private scene: Scene) {}
 
-  spawn(defId: string, pos: Vector3, yaw: number): Vehicle {
+  spawn(defId: string, pos: Vector3, yaw: number, category: VehicleCategory = "civilian"): Vehicle {
     const def = VEHICLE_DEFS[defId];
-    const vehicle = createVehicle(this.scene, def, pos, yaw);
+    const vehicle = createVehicle(this.scene, def, pos, yaw, category);
     this.vehicles.push(vehicle);
     return vehicle;
   }

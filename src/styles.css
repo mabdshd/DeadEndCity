@@ -153,3 +153,97 @@ body {
     opacity: 0.2;
   }
 }
+
+#cash-display {
+  position: fixed;
+  top: 20px;
+  left: 26px;
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(8, 8, 16, 0.55);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
+#cash-banked {
+  color: #59ffa0;
+  font-size: 18px;
+  text-shadow: 0 0 10px rgba(89, 255, 160, 0.5);
+}
+
+#cash-carried {
+  color: #ffe45c;
+  font-size: 18px;
+  text-shadow: 0 0 10px rgba(255, 228, 92, 0.5);
+}
+
+#objective-display {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  text-align: center;
+  background: rgba(8, 8, 16, 0.6);
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 180, 120, 0.45);
+  pointer-events: none;
+  min-width: 260px;
+}
+
+#objective-text {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #ffb478;
+  text-shadow: 0 0 12px rgba(255, 150, 80, 0.5);
+}
+
+#objective-distance {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #8fd3ff;
+  margin-top: 2px;
+}
+
+#feedback-flash {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 16;
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #ffe45c;
+  text-shadow: 0 0 24px rgba(255, 190, 60, 0.85), 0 0 6px rgba(0, 0, 0, 0.9);
+  text-align: center;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.finale-main {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: #59ffa0;
+  text-shadow: 0 0 36px rgba(89, 255, 160, 0.7);
+  margin-bottom: 18px;
+}
+
+.finale-stats {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  line-height: 1.9;
+  color: #f4f0ff;
+  margin-bottom: 34px;
+  white-space: pre-line;
+}

@@ -7,13 +7,19 @@ export type CrimeType =
 
 export type WantedLevel = 0 | 1 | 2 | 3;
 
-type EventMap = {
+export type EventMap = {
   "vehicle:entered": { vehicleId: string };
   "vehicle:exited": { vehicleId: string };
   "mode:changed": { mode: "on_foot" | "in_vehicle" };
   "crime:committed": { type: CrimeType; x: number; z: number; minWanted: WantedLevel };
   "wanted:changed": { level: WantedLevel };
   "wanted:escaped": Record<string, never>;
+  "cash:carriedChanged": { amount: number; delta: number };
+  "cash:banked": { amount: number };
+  "mission:started": { missionId: string; title: string; objective: string };
+  "mission:objectiveChanged": { missionId: string; text: string; pos: { x: number; z: number } | null };
+  "mission:completed": { missionId: string };
+  "mission:failed": { missionId: string };
 };
 
 type Handler<K extends keyof EventMap> = (payload: EventMap[K]) => void;
