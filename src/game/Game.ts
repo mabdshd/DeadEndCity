@@ -435,10 +435,10 @@ export class Game {
     this.playerController.active = false;
     if (this.controlMode === "in_vehicle") this.exitVehicle();
     this.playerController.active = false;
-    this.cash.loseCarriedCash();
-    this.wantedSystem.forceLevel(0);
-    this.policeManager.clearAll();
     this.missionManager.failActive();
+    this.wantedSystem.forceLevel(0);
+    this.cash.loseCarriedCash();
+    this.policeManager.clearAll();
     document.getElementById("busted-overlay")?.classList.remove("hidden");
     document.exitPointerLock();
     this.bustedTimer = BUST_CONFIG.overlayMs / 1000;
