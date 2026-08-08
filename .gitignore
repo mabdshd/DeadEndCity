@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+*.log
+.DS_Store
+*.tsbuildinfo
+
+# Local portal captures can contain student records.
+diagnostics/
+*.private.*

@@ -1,0 +1,155 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a0c14;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #fff;
+}
+
+#game-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(20, 16, 40, 0.85), rgba(5, 5, 12, 0.97));
+  z-index: 10;
+}
+
+.title-card {
+  text-align: center;
+  user-select: none;
+}
+
+.title-main {
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 14px;
+  color: #ff4d4d;
+  text-shadow: 0 0 30px rgba(255, 60, 60, 0.55);
+}
+
+.title-sub {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 18px;
+  color: #f4f0ff;
+  margin-bottom: 18px;
+}
+
+.title-tag {
+  font-size: 18px;
+  letter-spacing: 6px;
+  color: #8fd3ff;
+  margin-bottom: 40px;
+}
+
+.start-button {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  padding: 16px 42px;
+  color: #fff;
+  background: #e0362c;
+  border: 2px solid #ff7a5c;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.start-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 26px rgba(255, 90, 60, 0.7);
+}
+
+.hidden {
+  display: none !important;
+}
+
+#debug-panel {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 20;
+  font-size: 12px;
+  font-family: monospace;
+  color: #9fe8ff;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: pre;
+  pointer-events: none;
+}
+
+#interact-prompt {
+  position: fixed;
+  bottom: 22%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffe45c;
+  background: rgba(10, 10, 20, 0.7);
+  padding: 10px 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 228, 92, 0.6);
+  pointer-events: none;
+}
+
+#wanted-display {
+  position: fixed;
+  top: 20px;
+  right: 26px;
+  z-index: 15;
+  display: flex;
+  gap: 5px;
+  background: rgba(8, 8, 16, 0.45);
+  padding: 6px 12px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+.wanted-star {
+  font-size: 32px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.18);
+  text-shadow: none;
+  transition: color 0.15s ease;
+}
+
+.wanted-star.on {
+  color: #ff4d4d;
+  text-shadow: 0 0 14px rgba(255, 60, 60, 0.85);
+}
+
+.wanted-star.cooling {
+  animation: wantedCool 0.45s steps(2, start) infinite;
+}
+
+@keyframes wantedCool {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
